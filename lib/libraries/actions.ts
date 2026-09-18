@@ -167,5 +167,5 @@ export async function unlinkLibraryAction(
   }
 
   revalidatePath("/libraries");
-  redirect("/libraries");
+  redirect("/libraries?notice=unlinked");
 }

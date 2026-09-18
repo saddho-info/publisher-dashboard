@@ -122,7 +122,7 @@ export async function dispatchDistributionAction(
   }
 
   revalidateDistribution(distributionId);
-  redirect(`/distribution/${distributionId}`);
+  redirect(`/distribution/${distributionId}?notice=dispatched`);
 }
 
 export async function cancelDistributionAction(
@@ -141,5 +141,5 @@ export async function cancelDistributionAction(
   }
 
   revalidateDistribution(distributionId);
-  redirect(`/distribution/${distributionId}`);
+  redirect(`/distribution/${distributionId}?notice=cancelled`);
 }

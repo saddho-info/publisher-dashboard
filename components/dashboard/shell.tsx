@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { Suspense, useEffect, useRef, useState, type ReactNode } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
 import { TopBar } from "@/components/dashboard/top-bar";
+import { FlashToast } from "@/components/ui/flash-toast";
 import type { PublicUser } from "@/lib/auth/types";
 
 export function DashboardShell({
@@ -13,11 +14,17 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const [navOpen, setNavOpen] = useState(false);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previouslyFocused = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (!navOpen) {
+      previouslyFocused.current?.focus();
+      previouslyFocused.current = null;
       return;
     }
+
+    previouslyFocused.current = document.activeElement as HTMLElement | null;
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
@@ -27,6 +34,9 @@ export function DashboardShell({
 
     document.addEventListener("keydown", onKeyDown);
     document.body.style.overflow = "hidden";
+    // Defer so the close button is mounted.
+    queueMicrotask(() => closeButtonRef.current?.focus());
+
     return () => {
       document.removeEventListener("keydown", onKeyDown);
       document.body.style.overflow = "";
@@ -41,7 +51,15 @@ export function DashboardShell({
       >
         Skip to content
       </a>
-      <Sidebar user={user} open={navOpen} onClose={() => setNavOpen(false)} />
+      <Suspense fallback={null}>
+        <FlashToast />
+      </Suspense>
+      <Sidebar
+        user={user}
+        open={navOpen}
+        onClose={() => setNavOpen(false)}
+        closeButtonRef={closeButtonRef}
+      />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBar menuOpen={navOpen} onMenuOpen={() => setNavOpen(true)} />
         <main id="main-content" className="flex-1 px-4 py-6 sm:px-6">
