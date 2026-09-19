@@ -1,7 +1,13 @@
-export const API_URL =
-  process.env.API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  "http://localhost:3000";
+function resolveApiUrl(): string {
+  const candidates = [process.env.API_URL, process.env.NEXT_PUBLIC_API_URL];
+  for (const value of candidates) {
+    const trimmed = value?.trim();
+    if (trimmed) return trimmed.replace(/\/$/, "");
+  }
+  return "http://localhost:3000";
+}
+
+export const API_URL = resolveApiUrl();
 
 export const ACCESS_COOKIE = "pt_pub_access";
 export const REFRESH_COOKIE = "pt_pub_refresh";
