@@ -30,8 +30,12 @@ export async function POST(request: Request) {
     setAuthCookies(response, tokens);
     return response;
   } catch (error) {
-    const message =
+    const raw =
       error instanceof Error ? error.message : "Unable to sign in";
+    // Node fetch throws this when API_URL is missing/empty and the URL is relative.
+    const message = raw.includes("Failed to parse URL")
+      ? "Backend API_URL is not configured. Set API_URL and NEXT_PUBLIC_API_URL on Vercel to the Nest backend origin (e.g. https://pubtrack-backend.vercel.app)."
+      : raw;
     const status = message.toLowerCase().includes("invalid") ? 401 : 400;
     return NextResponse.json({ message }, { status });
   }
