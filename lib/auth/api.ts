@@ -51,15 +51,25 @@ export async function meRequest(accessToken: string): Promise<PublicUser> {
 }
 
 async function parseAuthResponse(response: Response): Promise<AuthTokens> {
-  const body = (await response.json().catch(() => ({}))) as {
+  const rawText = await response.text();
+  let body: {
     message?: string | string[];
-  } & Partial<AuthTokens>;
+  } & Partial<AuthTokens> = {};
+  try {
+    body = rawText ? (JSON.parse(rawText) as typeof body) : {};
+  } catch {
+    body = {};
+  }
 
   if (!response.ok) {
-    const message = Array.isArray(body.message)
+    const fromJson = Array.isArray(body.message)
       ? body.message.join(" ")
-      : (body.message ?? "Unable to sign in");
-    throw new Error(message);
+      : body.message;
+    const fromText =
+      /FUNCTION_INVOCATION_FAILED/i.test(rawText)
+        ? "Backend is down (Vercel FUNCTION_INVOCATION_FAILED). Check pubtrack-backend logs and env vars (DATABASE_URL, REDIS_URL), then redeploy."
+        : rawText.trim().slice(0, 200) || undefined;
+    throw new Error(fromJson ?? fromText ?? "Unable to sign in");
   }
 
   if (!body.accessToken || !body.refreshToken || !body.user) {

@@ -37,6 +37,22 @@ export type LibraryListItem = {
 
 export type LibraryDetail = LibraryListItem;
 
+export type LibraryRevenue = {
+  currency: string;
+  totalCents: number;
+};
+
+export type LibraryPublisherPerformance = {
+  library: Pick<LibraryListItem, "id" | "name" | "slug">;
+  summary: {
+    totalDistributed: number;
+    inStock: number;
+    inTransit: number;
+    sold: number;
+    revenueByCurrency: LibraryRevenue[];
+  };
+};
+
 export type LibraryListQuery = {
   page?: number;
   limit?: number;
