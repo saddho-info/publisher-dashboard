@@ -23,7 +23,7 @@ export function LibrariesTable({ libraries }: { libraries: LibraryListItem[] }) 
           <TableHead className="text-right">Staff</TableHead>
           <TableHead>Partnership</TableHead>
           <TableHead>Status</TableHead>
-          <TableHead>Performance</TableHead>
+          <TableHead>Analytics</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

@@ -44,14 +44,14 @@ describe("LibrariesTable", () => {
     render(<LibrariesTable libraries={[library]} />);
 
     expect(
-      screen.getByRole("columnheader", { name: "Performance" }),
+      screen.getByRole("columnheader", { name: "Analytics" }),
     ).toBeVisible();
     expect(screen.getByRole("link", { name: "View" })).toHaveAttribute(
       "href",
       "/libraries/lib_riverside",
     );
     expect(
-      screen.queryByRole("columnheader", { name: "Analytics" }),
+      screen.queryByRole("columnheader", { name: "Performance" }),
     ).not.toBeInTheDocument();
   });
 });

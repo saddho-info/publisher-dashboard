@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { BookDetailView } from "@/components/books/book-detail";
 import { ApiError } from "@/lib/api/server";
 import { getBook } from "@/lib/books/get-books";
+import { getEditionLibraryPerformance } from "@/lib/edition-performance/get-edition-performance";
 
 export async function generateMetadata({
   params,
@@ -31,5 +32,31 @@ export default async function BookDetailPage({
     throw error;
   });
 
-  return <BookDetailView book={book} />;
+  const settledPerformance = await Promise.allSettled(
+    book.editions.map((edition) => getEditionLibraryPerformance(edition.id)),
+  );
+  const editionPerformance = settledPerformance.map((result, index) => {
+    const editionId = book.editions[index].id;
+    if (result.status === "fulfilled") {
+      return {
+        editionId,
+        report: result.value,
+        errorMessage: null,
+      };
+    }
+
+    const error: unknown = result.reason;
+    if (!(error instanceof ApiError)) {
+      throw error;
+    }
+    return {
+      editionId,
+      report: null,
+      errorMessage: error.message,
+    };
+  });
+
+  return (
+    <BookDetailView book={book} editionPerformance={editionPerformance} />
+  );
 }

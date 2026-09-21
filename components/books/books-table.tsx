@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { buttonClassName } from "@/components/ui/button-styles";
 import {
   Table,
   TableBody,
@@ -20,6 +21,7 @@ export function BooksTable({ books }: { books: BookListItem[] }) {
           <TableHead>Category</TableHead>
           <TableHead className="text-right">Editions</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Analytics</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -47,6 +49,14 @@ export function BooksTable({ books }: { books: BookListItem[] }) {
               <Badge variant={book.isActive ? "success" : "muted"}>
                 {book.isActive ? "Active" : "Inactive"}
               </Badge>
+            </TableCell>
+            <TableCell>
+              <Link
+                href={`/books/${book.id}`}
+                className={buttonClassName({ variant: "outline", size: "sm" })}
+              >
+                View
+              </Link>
             </TableCell>
           </TableRow>
         ))}
