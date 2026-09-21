@@ -8,10 +8,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { requirePublisherSession } from "@/lib/auth/session";
 import { canWriteDistributions } from "@/lib/distribution/types";
 import { getInventory } from "@/lib/inventory/get-inventory";
-import {
-  getLibraries,
-  getPublishersForSelect,
-} from "@/lib/libraries/get-libraries";
+import { getLibraries } from "@/lib/libraries/get-libraries";
+import { getPublishersForSelect } from "@/lib/publishers/get-publishers";
 
 export const metadata: Metadata = {
   title: "New shipment",

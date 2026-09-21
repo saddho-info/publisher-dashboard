@@ -4,6 +4,8 @@ import { LibraryDetailView } from "@/components/libraries/library-detail";
 import { ApiError } from "@/lib/api/server";
 import { requirePublisherSession } from "@/lib/auth/session";
 import { getLibrary } from "@/lib/libraries/get-libraries";
+import { getLibraryUsers } from "@/lib/users/get-users";
+import { canManageLibraryPortalAccess } from "@/lib/users/types";
 
 export async function generateMetadata({
   params,
@@ -33,5 +35,20 @@ export default async function LibraryDetailPage({
     throw error;
   });
 
-  return <LibraryDetailView library={library} role={user.role} />;
+  const portalUsers = canManageLibraryPortalAccess(user.role)
+    ? (
+        await getLibraryUsers({ libraryId, limit: 100 }).catch(() => ({
+          data: [],
+          meta: { page: 1, limit: 100, total: 0, totalPages: 0 },
+        }))
+      ).data
+    : [];
+
+  return (
+    <LibraryDetailView
+      library={library}
+      role={user.role}
+      portalUsers={portalUsers}
+    />
+  );
 }

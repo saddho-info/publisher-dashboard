@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { LinkLibraryForm } from "@/components/libraries/link-library-form";
 import { requirePublisherSession } from "@/lib/auth/session";
 import { linkLibraryAction } from "@/lib/libraries/actions";
-import { getPublishersForSelect } from "@/lib/libraries/get-libraries";
+import { getPublishersForSelect } from "@/lib/publishers/get-publishers";
 import { canManageLibraries } from "@/lib/libraries/types";
 import { redirect } from "next/navigation";
 

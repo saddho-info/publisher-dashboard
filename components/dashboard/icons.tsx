@@ -100,6 +100,17 @@ export function ReportsIcon(props: IconProps) {
   );
 }
 
+export function PublishersIcon(props: IconProps) {
+  return (
+    <Svg {...props}>
+      <path d="M3 21h18" />
+      <path d="M5 21V7l7-4 7 4v14" />
+      <path d="M9 21v-6h6v6" />
+      <path d="M9 10h.01M15 10h.01" />
+    </Svg>
+  );
+}
+
 export function UsersIcon(props: IconProps) {
   return (
     <Svg {...props}>
@@ -145,6 +156,7 @@ const ICONS: Record<NavIconName, (props: IconProps) => ReactElement> = {
   analytics: AnalyticsIcon,
   alerts: AlertsIcon,
   reports: ReportsIcon,
+  publishers: PublishersIcon,
   users: UsersIcon,
   settings: SettingsIcon,
 };

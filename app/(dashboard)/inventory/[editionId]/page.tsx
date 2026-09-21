@@ -10,6 +10,7 @@ import {
   GenerateCopiesForm,
   ThresholdForm,
 } from "@/components/inventory/generate-copies-form";
+import { DownloadLabels } from "@/components/inventory/download-labels";
 import { MovementsTable } from "@/components/inventory/movements-table";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { buttonClassName } from "@/components/ui/button-styles";
@@ -160,7 +161,10 @@ export default async function EditionInventoryPage({
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <GenerateCopiesForm editionId={editionId} />
+            <div className="flex flex-col gap-5">
+              <GenerateCopiesForm editionId={editionId} />
+              <DownloadLabels editionId={editionId} />
+            </div>
           </CardContent>
         </Card>
         <Card>

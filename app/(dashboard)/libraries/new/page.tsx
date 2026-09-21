@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/dashboard/page-header";
 import { LibraryForm } from "@/components/libraries/library-form";
 import { requirePublisherSession } from "@/lib/auth/session";
 import { createLibraryAction } from "@/lib/libraries/actions";
-import { getPublishersForSelect } from "@/lib/libraries/get-libraries";
+import { getPublishersForSelect } from "@/lib/publishers/get-publishers";
 import { canManageLibraries } from "@/lib/libraries/types";
 import { redirect } from "next/navigation";
 
@@ -24,7 +24,7 @@ export default async function NewLibraryPage() {
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Add library"
-        description="Create a partner library and link it to this publisher. The library can sign in once a library admin is invited."
+        description="Create a partner library and link it to this publisher. A super admin can then add a library admin with a temporary password for portal access."
       />
       <LibraryForm
         action={createLibraryAction}

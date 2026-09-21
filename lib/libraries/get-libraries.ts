@@ -59,18 +59,3 @@ export async function getLibrary(id: string): Promise<LibraryDetail> {
 
   return (await response.json()) as LibraryDetail;
 }
-
-export async function getPublishersForSelect(): Promise<
-  Array<{ id: string; name: string }>
-> {
-  const response = await apiServerFetch("/api/v1/publishers?limit=100");
-  if (!response.ok) {
-    return [];
-  }
-  const body = (await response.json()) as {
-    data?: Array<{ id: string; name: string }>;
-  };
-  return Array.isArray(body.data)
-    ? body.data.map((row) => ({ id: row.id, name: row.name }))
-    : [];
-}

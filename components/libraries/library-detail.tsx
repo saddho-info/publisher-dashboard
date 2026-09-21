@@ -9,6 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PageHeader } from "@/components/dashboard/page-header";
+import { LibraryPortalAccess } from "@/components/libraries/library-portal-access";
 import { PartnershipForm } from "./partnership-form";
 import { UnlinkLibraryButton } from "./unlink-library-button";
 import { formatCount, formatLinkedDate } from "@/lib/libraries/format";
@@ -17,16 +18,23 @@ import {
   type LibraryDetail,
 } from "@/lib/libraries/types";
 import { canWriteDistributions } from "@/lib/distribution/types";
+import {
+  canManageLibraryPortalAccess,
+  type LibraryUser,
+} from "@/lib/users/types";
 
 export function LibraryDetailView({
   library,
   role,
+  portalUsers = [],
 }: {
   library: LibraryDetail;
   role: string;
+  portalUsers?: LibraryUser[];
 }) {
   const canManage = canManageLibraries(role);
   const canDistribute = canWriteDistributions(role);
+  const canManagePortal = canManageLibraryPortalAccess(role);
 
   return (
     <div className="flex flex-col gap-6">
@@ -34,7 +42,7 @@ export function LibraryDetailView({
         title={library.name}
         description={library.email ?? `/${library.slug}`}
         actions={
-          canManage || canDistribute ? (
+          canManage || canDistribute || canManagePortal ? (
             <div className="flex flex-wrap gap-2">
               {canManage ? (
                 <Link
@@ -42,6 +50,14 @@ export function LibraryDetailView({
                   className={buttonClassName({ variant: "outline" })}
                 >
                   Edit details
+                </Link>
+              ) : null}
+              {canManagePortal ? (
+                <Link
+                  href={`/libraries/${library.id}/staff/new`}
+                  className={buttonClassName({ variant: "outline" })}
+                >
+                  Add portal account
                 </Link>
               ) : null}
               {canDistribute ? (
@@ -143,6 +159,10 @@ export function LibraryDetailView({
           </CardContent>
         </Card>
       </section>
+
+      {canManagePortal ? (
+        <LibraryPortalAccess libraryId={library.id} users={portalUsers} />
+      ) : null}
     </div>
   );
 }

@@ -8,6 +8,7 @@ export type NavIconName =
   | "analytics"
   | "alerts"
   | "reports"
+  | "publishers"
   | "users"
   | "settings";
 
@@ -17,6 +18,8 @@ export type NavItem = {
   description: string;
   phase: string;
   icon: NavIconName;
+  /** When set, only these roles see the item in the sidebar. */
+  roles?: string[];
 };
 
 export type NavGroup = {
@@ -113,6 +116,14 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Admin",
     items: [
       {
+        href: "/publishers",
+        label: "Publishers",
+        description: "Create and manage publisher organizations.",
+        phase: "Phase 8",
+        icon: "publishers",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
         href: "/users",
         label: "Users",
         description: "Publisher staff accounts and role assignment.",
@@ -144,4 +155,18 @@ export function matchNavItem(pathname: string): NavItem | undefined {
 
 export function isNavActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+export function navVisibleForRole(item: NavItem, role: string): boolean {
+  if (!item.roles || item.roles.length === 0) {
+    return true;
+  }
+  return item.roles.includes(role);
+}
+
+export function filterNavGroupsForRole(role: string): NavGroup[] {
+  return NAV_GROUPS.map((group) => ({
+    ...group,
+    items: group.items.filter((item) => navVisibleForRole(item, role)),
+  })).filter((group) => group.items.length > 0);
 }

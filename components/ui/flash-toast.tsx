@@ -34,6 +34,15 @@ const NOTICE_TOASTS: Record<string, ToastInput> = {
     description: "Inventory has been updated.",
     variant: "success",
   },
+  portal_user_created: {
+    title: "Portal account created",
+    description: "Share the temporary password with the library contact.",
+    variant: "success",
+  },
+  portal_user_updated: {
+    title: "Portal account updated",
+    variant: "success",
+  },
 };
 
 /** Shows a one-shot toast from `?notice=` after a server-action redirect. */

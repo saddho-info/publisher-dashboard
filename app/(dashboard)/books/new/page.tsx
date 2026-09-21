@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { BookForm } from "@/components/books/book-form";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { createBookAction } from "@/lib/books/actions";
-import { getPublishersForSelect } from "@/lib/books/get-books";
+import { getPublishersForSelect } from "@/lib/publishers/get-publishers";
 import { requirePublisherSession } from "@/lib/auth/session";
 
 export const metadata: Metadata = {

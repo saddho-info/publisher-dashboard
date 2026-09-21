@@ -8,6 +8,10 @@ export function formatRole(role: string): string {
       return "Publisher admin";
     case "PUBLISHER_STAFF":
       return "Publisher staff";
+    case "LIBRARY_ADMIN":
+      return "Library admin";
+    case "LIBRARY_STAFF":
+      return "Library staff";
     default:
       return role.replace(/_/g, " ").toLowerCase();
   }
