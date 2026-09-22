@@ -72,9 +72,11 @@ export function AuditLogsTable({ rows }: { rows: AuditLogRow[] }) {
 export function AuditPagination({
   meta,
   query,
+  baseHref = "/reports",
 }: {
   meta: PaginationMeta;
-  query: { search?: string; entityType?: string };
+  query: { search?: string; entityType?: string; entityId?: string; action?: string };
+  baseHref?: string;
 }) {
   if (meta.totalPages <= 1) return null;
 
@@ -86,7 +88,9 @@ export function AuditPagination({
     params.set("page", String(page));
     if (query.search) params.set("search", query.search);
     if (query.entityType) params.set("entityType", query.entityType);
-    return `/reports?${params.toString()}`;
+    if (query.entityId) params.set("entityId", query.entityId);
+    if (query.action) params.set("action", query.action);
+    return `${baseHref}?${params.toString()}`;
   }
 
   return (

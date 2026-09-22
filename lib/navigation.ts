@@ -30,6 +30,68 @@ export type NavGroup = {
 
 export const NAV_GROUPS: NavGroup[] = [
   {
+    id: "system",
+    label: "System",
+    items: [
+      {
+        href: "/system",
+        label: "System Overview",
+        description: "Platform-wide organizations, users, sales, and activity.",
+        phase: "Super Admin",
+        icon: "dashboard",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/publishers",
+        label: "Publishers",
+        description: "Create and manage publisher organizations.",
+        phase: "Super Admin",
+        icon: "publishers",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/all-libraries",
+        label: "All Libraries",
+        description: "Manage libraries across all publishers.",
+        phase: "Super Admin",
+        icon: "libraries",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/users",
+        label: "Users",
+        description: "Manage user access across the platform.",
+        phase: "Super Admin",
+        icon: "users",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/feature-flags",
+        label: "Feature Flags",
+        description: "Control platform features and organization overrides.",
+        phase: "Super Admin",
+        icon: "alerts",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/audit-logs",
+        label: "Audit Logs",
+        description: "Review platform activity and mutations.",
+        phase: "Super Admin",
+        icon: "reports",
+        roles: ["SUPER_ADMIN"],
+      },
+      {
+        href: "/system-settings",
+        label: "System Settings",
+        description: "Manage platform-wide configuration.",
+        phase: "Super Admin",
+        icon: "settings",
+        roles: ["SUPER_ADMIN"],
+      },
+    ],
+  },
+  {
     id: "overview",
     label: "Overview",
     items: [
@@ -113,26 +175,11 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     id: "admin",
-    label: "Admin",
+    label: "Organization",
     items: [
       {
-        href: "/publishers",
-        label: "Publishers",
-        description: "Create and manage publisher organizations.",
-        phase: "Phase 8",
-        icon: "publishers",
-        roles: ["SUPER_ADMIN"],
-      },
-      {
-        href: "/users",
-        label: "Users",
-        description: "Publisher staff accounts and role assignment.",
-        phase: "Phase 8",
-        icon: "users",
-      },
-      {
         href: "/settings",
-        label: "Settings",
+        label: "Organization Settings",
         description: "Organization profile and dashboard preferences.",
         phase: "Later",
         icon: "settings",

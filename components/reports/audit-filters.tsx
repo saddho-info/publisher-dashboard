@@ -5,9 +5,13 @@ import { Select } from "@/components/ui/select";
 export function AuditFilters({
   search,
   entityType,
+  entityId = "",
+  action = "",
 }: {
   search: string;
   entityType: string;
+  entityId?: string;
+  action?: string;
 }) {
   return (
     <form method="get" className="flex flex-col gap-2 sm:flex-row sm:items-end">
@@ -34,6 +38,8 @@ export function AuditFilters({
           { value: "SyncTransaction", label: "Sync" },
         ]}
       />
+      <Input name="entityId" label="Entity ID" defaultValue={entityId} />
+      <Input name="action" label="Action" defaultValue={action} />
       <Button type="submit" variant="secondary">
         Filter
       </Button>

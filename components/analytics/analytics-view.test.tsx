@@ -48,18 +48,8 @@ describe("dashboard navigation", () => {
   });
 
   it("does not add a sidebar item for the subpage", () => {
-    expect(NAV_ITEMS.map((item) => item.href)).toEqual([
-      "/dashboard",
-      "/books",
-      "/inventory",
-      "/libraries",
-      "/distribution",
-      "/sales",
-      "/analytics",
-      "/alerts",
-      "/reports",
-      "/users",
-      "/settings",
-    ]);
+    expect(NAV_ITEMS.map((item) => item.href)).not.toContain(
+      "/analytics/edition-performance",
+    );
   });
 });

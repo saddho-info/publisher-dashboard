@@ -3,6 +3,13 @@ import type { PaginationMeta, Paginated } from "@/lib/books/types";
 export type { PaginationMeta, Paginated };
 
 export const LIBRARY_PORTAL_ROLES = ["LIBRARY_ADMIN", "LIBRARY_STAFF"] as const;
+export const USER_ROLES = [
+  "SUPER_ADMIN",
+  "PUBLISHER_ADMIN",
+  "PUBLISHER_STAFF",
+  "LIBRARY_ADMIN",
+  "LIBRARY_STAFF",
+] as const;
 
 export type LibraryPortalRole = (typeof LIBRARY_PORTAL_ROLES)[number];
 
@@ -25,6 +32,17 @@ export type LibraryUserListQuery = {
   search?: string;
   isActive?: boolean;
   libraryId: string;
+};
+
+export type UserRole = (typeof USER_ROLES)[number];
+export type UserListQuery = {
+  page?: number;
+  limit?: number;
+  search?: string;
+  role?: string;
+  isActive?: boolean;
+  publisherId?: string;
+  libraryId?: string;
 };
 
 export type FormState = {

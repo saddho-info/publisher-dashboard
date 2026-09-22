@@ -4,7 +4,32 @@ import type {
   LibraryUser,
   LibraryUserListQuery,
   Paginated,
+  UserListQuery,
 } from "@/lib/users/types";
+
+export async function getUsers(
+  query: UserListQuery = {},
+): Promise<Paginated<LibraryUser>> {
+  const params = new URLSearchParams();
+  params.set("page", String(query.page ?? 1));
+  params.set("limit", String(query.limit ?? 20));
+  if (query.search) params.set("search", query.search);
+  if (query.isActive !== undefined) params.set("isActive", String(query.isActive));
+  if (query.role) params.set("role", query.role);
+  if (query.publisherId) params.set("publisherId", query.publisherId);
+  if (query.libraryId) params.set("libraryId", query.libraryId);
+
+  const response = await apiServerFetch(`/api/v1/users?${params.toString()}`);
+  if (response.status === 401) redirect("/login");
+  if (!response.ok) {
+    throw new ApiError(await readApiError(response), response.status);
+  }
+  const body = (await response.json()) as Paginated<LibraryUser>;
+  if (!Array.isArray(body.data) || !body.meta) {
+    throw new ApiError("Users response was malformed.", 502);
+  }
+  return body;
+}
 
 function searchParamsFrom(
   query: LibraryUserListQuery,

@@ -21,12 +21,16 @@ export default async function ReportsPage({
     page?: string;
     search?: string;
     entityType?: string;
+    entityId?: string;
+    action?: string;
   }>;
 }) {
   await requirePublisherSession();
   const params = await searchParams;
   const search = params.search?.trim() ?? "";
   const entityType = params.entityType?.trim() ?? "";
+  const entityId = params.entityId?.trim() ?? "";
+  const action = params.action?.trim() ?? "";
   const page = Math.max(1, Number(params.page) || 1);
 
   const audit = await getAuditLogs({
@@ -34,6 +38,8 @@ export default async function ReportsPage({
     limit: 20,
     search: search || undefined,
     entityType: entityType || undefined,
+    entityId: entityId || undefined,
+    action: action || undefined,
   });
 
   return (
@@ -47,17 +53,17 @@ export default async function ReportsPage({
 
       <section className="flex flex-col gap-3" aria-label="Audit log">
         <h2 className="text-sm font-semibold">Audit log</h2>
-        <AuditFilters search={search} entityType={entityType} />
+        <AuditFilters search={search} entityType={entityType} entityId={entityId} action={action} />
 
         {audit.data.length === 0 ? (
           <EmptyState
             title={
-              search || entityType
+              search || entityType || entityId || action
                 ? "No matching audit events"
                 : "No audit events yet"
             }
             description={
-              search || entityType
+              search || entityType || entityId || action
                 ? "Try a different search or entity filter."
                 : "Sales, distributions, receipts, copy, inventory, and sync mutations appear here."
             }
@@ -67,7 +73,7 @@ export default async function ReportsPage({
             <AuditLogsTable rows={audit.data} />
             <AuditPagination
               meta={audit.meta}
-              query={{ search, entityType }}
+              query={{ search, entityType, entityId, action }}
             />
           </>
         )}

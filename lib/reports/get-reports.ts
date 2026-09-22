@@ -17,6 +17,7 @@ function searchParamsFrom(query: {
   limit?: number;
   search?: string;
   entityType?: string;
+  entityId?: string;
   action?: string;
 }): string {
   const params = new URLSearchParams();
@@ -24,6 +25,7 @@ function searchParamsFrom(query: {
   if (query.limit) params.set("limit", String(query.limit));
   if (query.search) params.set("search", query.search);
   if (query.entityType) params.set("entityType", query.entityType);
+  if (query.entityId) params.set("entityId", query.entityId);
   if (query.action) params.set("action", query.action);
   return params.toString();
 }
@@ -33,6 +35,7 @@ export async function getAuditLogs(query: {
   limit?: number;
   search?: string;
   entityType?: string;
+  entityId?: string;
   action?: string;
 } = {}): Promise<AuditLogListResult> {
   const response = await apiServerFetch(
