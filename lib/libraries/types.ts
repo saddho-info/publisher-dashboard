@@ -1,4 +1,4 @@
-import type { PaginationMeta, Paginated } from "@/lib/books/types";
+import type { Edition, PaginationMeta, Paginated } from "@/lib/books/types";
 
 export type { PaginationMeta, Paginated };
 
@@ -20,6 +20,11 @@ export type LibraryLink = {
   updatedAt: string;
 };
 
+export type LibraryRevenue = {
+  currency: string;
+  totalCents: number;
+};
+
 export type LibraryListItem = {
   id: string;
   name: string;
@@ -33,14 +38,19 @@ export type LibraryListItem = {
   _count: { users: number };
   link: LibraryLink | null;
   stock: LibraryStock;
+  /**
+   * Publisher-scoped list ledger from GET /api/v1/libraries.
+   * Absent when the list payload has not been enriched (do not N+1
+   * /publisher-performance). Missing last sent / distributed / revenue
+   * render as "—"; in stock and sold always come from `stock`.
+   */
+  lastDispatchedAt?: string | null;
+  lastDistributionId?: string | null;
+  totalDistributed?: number;
+  revenueByCurrency?: LibraryRevenue[];
 };
 
 export type LibraryDetail = LibraryListItem;
-
-export type LibraryRevenue = {
-  currency: string;
-  totalCents: number;
-};
 
 export type LibraryPublisherPerformance = {
   library: Pick<LibraryListItem, "id" | "name" | "slug">;
@@ -51,6 +61,43 @@ export type LibraryPublisherPerformance = {
     sold: number;
     revenueByCurrency: LibraryRevenue[];
   };
+};
+
+/**
+ * GET /api/v1/libraries/:id/edition-performance
+ * Mirror of EditionPerformanceReport.libraries, inverted: editions[] on the library.
+ */
+export type LibraryEditionPerformanceEdition = Pick<
+  Edition,
+  | "id"
+  | "bookId"
+  | "title"
+  | "format"
+  | "isbn"
+  | "isbn10"
+  | "listPriceCents"
+  | "currency"
+>;
+
+export type LibraryEditionPerformanceRow = {
+  book: {
+    id: string;
+    title: string;
+    authors: string;
+    publisherId: string;
+  };
+  edition: LibraryEditionPerformanceEdition;
+  totalDistributed: number;
+  inStock: number;
+  inTransit: number;
+  sold: number;
+  revenueByCurrency: LibraryRevenue[];
+};
+
+export type LibraryEditionPerformance = {
+  library: Pick<LibraryListItem, "id" | "name" | "slug">;
+  summary: LibraryPublisherPerformance["summary"];
+  editions: LibraryEditionPerformanceRow[];
 };
 
 export type LibraryListQuery = {

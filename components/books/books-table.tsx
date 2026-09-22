@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LedgerStack } from "@/components/libraries/ledger-stack";
+import { StackedRevenue } from "@/components/libraries/stacked-revenue";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button-styles";
 import {
@@ -9,17 +11,49 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { formatOptionalCount } from "@/lib/libraries/format";
 import type { BookListItem, PaginationMeta } from "@/lib/books/types";
 
 export function BooksTable({ books }: { books: BookListItem[] }) {
   return (
-    <Table>
+    <>
+      <div className="grid gap-3 md:hidden">
+        {books.map((book) => (
+          <LedgerStack
+            key={book.id}
+            href={`/books/${book.id}`}
+            title={book.title}
+            meta={
+              <p className="text-xs text-muted-foreground">{book.authors}</p>
+            }
+            items={[
+              {
+                label: "In libraries",
+                value: formatOptionalCount(book.libraryStock),
+              },
+              { label: "Sold", value: formatOptionalCount(book.sold) },
+              {
+                label: "Sales",
+                value: (
+                  <StackedRevenue
+                    revenue={book.revenueByCurrency}
+                    align="start"
+                  />
+                ),
+              },
+            ]}
+          />
+        ))}
+      </div>
+      <div className="hidden md:block">
+        <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Title</TableHead>
           <TableHead>Authors</TableHead>
-          <TableHead>Category</TableHead>
-          <TableHead className="text-right">Editions</TableHead>
+          <TableHead className="text-right">In libraries</TableHead>
+          <TableHead className="text-right">Sold</TableHead>
+          <TableHead className="text-right">Sales</TableHead>
           <TableHead>Status</TableHead>
           <TableHead>Analytics</TableHead>
         </TableRow>
@@ -37,13 +71,19 @@ export function BooksTable({ books }: { books: BookListItem[] }) {
               {book.subtitle ? (
                 <p className="text-xs text-muted-foreground">{book.subtitle}</p>
               ) : null}
+              {book.category ? (
+                <p className="text-xs text-muted-foreground">{book.category}</p>
+              ) : null}
             </TableCell>
             <TableCell className="text-muted-foreground">{book.authors}</TableCell>
-            <TableCell className="text-muted-foreground">
-              {book.category ?? "—"}
+            <TableCell className="text-right tabular-nums">
+              {formatOptionalCount(book.libraryStock)}
             </TableCell>
             <TableCell className="text-right tabular-nums">
-              {book._count.editions}
+              {formatOptionalCount(book.sold)}
+            </TableCell>
+            <TableCell className="text-right">
+              <StackedRevenue revenue={book.revenueByCurrency} />
             </TableCell>
             <TableCell>
               <Badge variant={book.isActive ? "success" : "muted"}>
@@ -61,7 +101,9 @@ export function BooksTable({ books }: { books: BookListItem[] }) {
           </TableRow>
         ))}
       </TableBody>
-    </Table>
+        </Table>
+      </div>
+    </>
   );
 }
 

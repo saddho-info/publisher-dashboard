@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { LedgerStack } from "@/components/libraries/ledger-stack";
+import { StackedRevenue } from "@/components/libraries/stacked-revenue";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button-styles";
 import {
@@ -9,66 +11,149 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatCount } from "@/lib/libraries/format";
+import {
+  formatCount,
+  formatDistributionDate,
+  formatOptionalCount,
+  libraryInStock,
+  librarySold,
+} from "@/lib/libraries/format";
 import type { LibraryListItem, PaginationMeta } from "@/lib/libraries/types";
 
 export function LibrariesTable({ libraries }: { libraries: LibraryListItem[] }) {
   return (
-    <Table>
+    <>
+      <div className="grid gap-3 md:hidden">
+        {libraries.map((library) => (
+          <LedgerStack
+            key={library.id}
+            href={`/libraries/${library.id}`}
+            title={library.name}
+            meta={
+              <div className="flex flex-wrap gap-1">
+                <Badge variant={library.link?.isActive ? "success" : "warning"}>
+                  {library.link?.isActive ? "Linked" : "Paused"}
+                </Badge>
+                <Badge variant={library.isActive ? "success" : "muted"}>
+                  {library.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+            }
+            items={[
+              {
+                label: "Last sent",
+                value:
+                  library.lastDistributionId && library.lastDispatchedAt ? (
+                    <Link
+                      href={`/distribution/${library.lastDistributionId}`}
+                      className="hover:text-primary hover:underline"
+                    >
+                      {formatDistributionDate(library.lastDispatchedAt)}
+                    </Link>
+                  ) : (
+                    formatDistributionDate(library.lastDispatchedAt)
+                  ),
+              },
+              {
+                label: "Distributed",
+                value: formatOptionalCount(library.totalDistributed),
+              },
+              {
+                label: "In stock",
+                value: formatCount(libraryInStock(library)),
+              },
+              {
+                label: "Sold",
+                value: formatCount(librarySold(library)),
+              },
+              {
+                label: "Sales",
+                value: (
+                  <StackedRevenue
+                    revenue={library.revenueByCurrency}
+                    align="start"
+                  />
+                ),
+              },
+            ]}
+          />
+        ))}
+      </div>
+      <div className="hidden md:block">
+        <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Library</TableHead>
-          <TableHead>Contact</TableHead>
-          <TableHead className="text-right">On hand</TableHead>
-          <TableHead className="text-right">Staff</TableHead>
-          <TableHead>Partnership</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Analytics</TableHead>
+          <TableHead>Last sent</TableHead>
+          <TableHead className="text-right">Distributed</TableHead>
+          <TableHead className="text-right">In stock</TableHead>
+          <TableHead className="text-right">Sold</TableHead>
+          <TableHead className="text-right">Sales</TableHead>
+          <TableHead>
+            <span className="sr-only">Open</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {libraries.map((library) => (
-          <TableRow key={library.id}>
-            <TableCell>
-              <Link
-                href={`/libraries/${library.id}`}
-                className="font-medium text-foreground hover:text-primary hover:underline"
-              >
-                {library.name}
-              </Link>
-              <p className="text-xs text-muted-foreground">/{library.slug}</p>
-            </TableCell>
-            <TableCell className="text-muted-foreground">
-              {library.email ?? library.phone ?? "—"}
-            </TableCell>
-            <TableCell className="text-right tabular-nums">
-              {formatCount(library.stock.onHand)}
-            </TableCell>
-            <TableCell className="text-right tabular-nums">
-              {formatCount(library._count.users)}
-            </TableCell>
-            <TableCell>
-              <Badge variant={library.link?.isActive ? "success" : "warning"}>
-                {library.link?.isActive ? "Linked" : "Paused"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Badge variant={library.isActive ? "success" : "muted"}>
-                {library.isActive ? "Active" : "Inactive"}
-              </Badge>
-            </TableCell>
-            <TableCell>
-              <Link
-                href={`/libraries/${library.id}`}
-                className={buttonClassName({ variant: "outline", size: "sm" })}
-              >
-                View
-              </Link>
-            </TableCell>
-          </TableRow>
-        ))}
+        {libraries.map((library) => {
+          const lastSent = formatDistributionDate(library.lastDispatchedAt);
+          return (
+            <TableRow key={library.id}>
+              <TableCell>
+                <Link
+                  href={`/libraries/${library.id}`}
+                  className="font-medium text-foreground hover:text-primary hover:underline"
+                >
+                  {library.name}
+                </Link>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <Badge variant={library.link?.isActive ? "success" : "warning"}>
+                    {library.link?.isActive ? "Linked" : "Paused"}
+                  </Badge>
+                  <Badge variant={library.isActive ? "success" : "muted"}>
+                    {library.isActive ? "Active" : "Inactive"}
+                  </Badge>
+                </div>
+              </TableCell>
+              <TableCell className="tabular-nums text-muted-foreground">
+                {library.lastDistributionId && library.lastDispatchedAt ? (
+                  <Link
+                    href={`/distribution/${library.lastDistributionId}`}
+                    className="hover:text-primary hover:underline"
+                  >
+                    {lastSent}
+                  </Link>
+                ) : (
+                  lastSent
+                )}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                {formatOptionalCount(library.totalDistributed)}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                {formatCount(libraryInStock(library))}
+              </TableCell>
+              <TableCell className="text-right tabular-nums">
+                {formatCount(librarySold(library))}
+              </TableCell>
+              <TableCell className="text-right">
+                <StackedRevenue revenue={library.revenueByCurrency} />
+              </TableCell>
+              <TableCell>
+                <Link
+                  href={`/libraries/${library.id}`}
+                  className={buttonClassName({ variant: "outline", size: "sm" })}
+                >
+                  View
+                </Link>
+              </TableCell>
+            </TableRow>
+          );
+        })}
       </TableBody>
-    </Table>
+        </Table>
+      </div>
+    </>
   );
 }
 

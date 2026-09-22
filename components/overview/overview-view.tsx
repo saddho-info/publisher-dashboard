@@ -28,7 +28,7 @@ export function OverviewView({
     <div className="flex flex-col gap-6">
       <PageHeader
         title="Dashboard"
-        description="Inventory, distribution, and sales at a glance — the seven publisher questions."
+        description="Inventory, distribution, and sales at a glance — the seven publisher questions. Open a library or a book to see stock, sold, and sales."
         actions={
           <div className="flex flex-wrap items-center gap-2">
             {data.source === "live" ? (

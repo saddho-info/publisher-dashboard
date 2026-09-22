@@ -6,14 +6,17 @@ import type { LibraryListItem } from "@/lib/libraries/types";
 export function SalesFilters({
   search,
   libraryId,
+  editionId = "",
   libraries,
 }: {
   search: string;
   libraryId: string;
+  editionId?: string;
   libraries: LibraryListItem[];
 }) {
   return (
     <form method="get" className="flex flex-col gap-2 sm:flex-row sm:items-end">
+      {editionId ? <input type="hidden" name="editionId" value={editionId} /> : null}
       <div className="min-w-0 flex-1">
         <Input
           name="search"

@@ -141,16 +141,23 @@ describe("BookDetailView edition analytics", () => {
     );
 
     const hardcover = screen.getByRole("article", {
-      name: "Hardcover · ISBN 9781234567890 analytics",
+      name: "Hardcover · ISBN 978-123456789-0 analytics",
     });
     const paperback = screen.getByRole("article", {
-      name: "Paperback · ISBN 9781234567891 analytics",
+      name: "Paperback · ISBN 978-123456789-1 analytics",
     });
 
-    expect(within(hardcover).getByText("12")).toBeVisible();
-    expect(within(hardcover).getByText("HARDCOVER Library")).toBeVisible();
-    expect(within(paperback).getByText("8")).toBeVisible();
-    expect(within(paperback).getByText("PAPERBACK Library")).toBeVisible();
+    expect(within(hardcover).getAllByText("12").length).toBeGreaterThan(0);
+    expect(
+      within(hardcover).getAllByText("HARDCOVER Library").length,
+    ).toBeGreaterThan(0);
+    expect(within(paperback).getAllByText("8").length).toBeGreaterThan(0);
+    expect(
+      within(paperback).getAllByText("PAPERBACK Library").length,
+    ).toBeGreaterThan(0);
+    expect(
+      within(hardcover).getByRole("link", { name: "View sales for this edition" }),
+    ).toHaveAttribute("href", "/sales?editionId=ed_hardcover");
     expect(
       within(hardcover).getByRole("link", { name: "Full report" }),
     ).toHaveAttribute(
@@ -163,5 +170,37 @@ describe("BookDetailView edition analytics", () => {
       "href",
       "/analytics/edition-performance?editionId=ed_paperback",
     );
+  });
+
+  it("places edition analytics above the catalog and keeps stock links", () => {
+    render(
+      <BookDetailView
+        book={book}
+        editionPerformance={editionPerformance}
+      />,
+    );
+
+    expect(screen.getByText("Where this title sits and sells.")).toBeVisible();
+
+    const analytics = screen.getByRole("heading", {
+      name: "Edition analytics",
+    });
+    const catalog = screen.getByRole("heading", { name: "Editions" });
+    const about = screen.getByRole("heading", { name: "About this title" });
+    expect(analytics.compareDocumentPosition(catalog)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+    expect(catalog.compareDocumentPosition(about)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+
+    expect(
+      within(screen.getAllByRole("table")[0]).getByRole("link", {
+        name: "HARDCOVER Library",
+      }),
+    ).toHaveAttribute("href", "/libraries/lib_ed_hardcover");
+    const stockLinks = screen.getAllByRole("link", { name: "Stock" });
+    expect(stockLinks[0]).toHaveAttribute("href", "/inventory/ed_hardcover");
+    expect(screen.getByText("978-123456789-0")).toBeVisible();
   });
 });

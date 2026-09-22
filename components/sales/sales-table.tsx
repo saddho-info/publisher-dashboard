@@ -81,7 +81,7 @@ export function SalesPagination({
   query,
 }: {
   meta: PaginationMeta;
-  query: { search: string; libraryId: string };
+  query: { search: string; libraryId: string; editionId?: string };
 }) {
   if (meta.totalPages <= 1) {
     return null;
@@ -91,6 +91,7 @@ export function SalesPagination({
     const params = new URLSearchParams();
     if (query.search) params.set("search", query.search);
     if (query.libraryId) params.set("libraryId", query.libraryId);
+    if (query.editionId) params.set("editionId", query.editionId);
     params.set("page", String(page));
     return `/sales?${params.toString()}`;
   }

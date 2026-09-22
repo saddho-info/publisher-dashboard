@@ -58,6 +58,14 @@ export type BookListItem = {
   updatedAt: string;
   publisher: BookPublisher;
   _count: { editions: number };
+  /**
+   * Publisher-scoped movement from GET /api/v1/books, summed across editions.
+   * Absent when the list payload has not been enriched — do not N+1
+   * edition-performance per row. Missing values render as "—".
+   */
+  libraryStock?: number;
+  sold?: number;
+  revenueByCurrency?: Array<{ currency: string; totalCents: number }>;
 };
 
 export type BookDetail = BookListItem & {

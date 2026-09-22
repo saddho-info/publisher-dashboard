@@ -81,55 +81,89 @@ export function BookDetailView({
         <span className="text-xs text-muted-foreground">/{book.slug}</span>
       </div>
 
-      <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
-        <Card>
-          <CardHeader>
-            <CardTitle>About this title</CardTitle>
-            <CardDescription>
-              Catalog metadata used by inventory and distribution.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            {book.description ? (
-              <p className="whitespace-pre-wrap text-foreground">
-                {book.description}
-              </p>
-            ) : (
-              <p className="text-muted-foreground">No description yet.</p>
-            )}
-            <dl className="grid gap-2 sm:grid-cols-2">
-              <div>
-                <dt className="text-xs text-muted-foreground">Publisher</dt>
-                <dd>{book.publisher.name}</dd>
-              </div>
-              <div>
-                <dt className="text-xs text-muted-foreground">Editions</dt>
-                <dd>{book._count.editions}</dd>
-              </div>
-            </dl>
-          </CardContent>
-        </Card>
+      {book.editions.length > 0 ? (
+        <section
+          className="flex flex-col gap-4"
+          aria-labelledby="edition-analytics-heading"
+        >
+          <div>
+            <h2
+              id="edition-analytics-heading"
+              className="text-base font-semibold"
+            >
+              Edition analytics
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Where this title sits and sells.
+            </p>
+          </div>
 
-        <Card className="overflow-hidden">
-          <CardHeader>
-            <CardTitle>Cover</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {book.coverImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={book.coverImageUrl}
-                alt={`Cover of ${book.title}`}
-                className="mx-auto max-h-64 rounded-md border border-border object-cover"
-              />
-            ) : (
-              <p className="text-sm text-muted-foreground">
-                No cover URL. Add one when editing the book or an edition.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </section>
+          {editionPerformance.map(({ editionId, report, errorMessage }) => {
+            const edition = book.editions.find((item) => item.id === editionId);
+            if (!edition) {
+              return null;
+            }
+
+            const editionLabel = `${formatBookFormat(edition.format)} · ISBN ${formatIsbn13(edition.isbn)}`;
+            return (
+              <article
+                key={editionId}
+                aria-label={`${editionLabel} analytics`}
+                className="flex flex-col gap-4 rounded-lg border border-border p-4"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-medium text-foreground">
+                      {edition.title || formatBookFormat(edition.format)}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {editionLabel}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    <Link
+                      href={`/sales?editionId=${editionId}`}
+                      className="self-center text-sm font-medium text-primary hover:underline"
+                    >
+                      View sales for this edition
+                    </Link>
+                    <Link
+                      href={editionPerformanceHref(editionId)}
+                      className={buttonClassName({
+                        variant: "outline",
+                        size: "sm",
+                      })}
+                    >
+                      Full report
+                    </Link>
+                  </div>
+                </div>
+
+                {report ? (
+                  <>
+                    <EditionPerformanceKpis summary={report.summary} />
+                    {report.libraries.length > 0 ? (
+                      <EditionPerformanceTable libraries={report.libraries} />
+                    ) : (
+                      <EmptyState
+                        title="No library activity for this edition"
+                        description="This edition has not been distributed or sold through a partner library yet."
+                      />
+                    )}
+                  </>
+                ) : errorMessage ? (
+                  <ErrorState
+                    title="Edition analytics failed to load"
+                    message={errorMessage}
+                    action={<RetryReportButton />}
+                    className="py-8"
+                  />
+                ) : null}
+              </article>
+            );
+          })}
+        </section>
+      ) : null}
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center justify-between">
@@ -215,82 +249,55 @@ export function BookDetailView({
         )}
       </section>
 
-      {book.editions.length > 0 ? (
-        <section
-          className="flex flex-col gap-4"
-          aria-labelledby="edition-analytics-heading"
-        >
-          <div>
-            <h2
-              id="edition-analytics-heading"
-              className="text-base font-semibold"
-            >
-              Edition analytics
-            </h2>
-            <p className="text-sm text-muted-foreground">
-              Library distribution, stock, sales, and revenue are kept
-              separate for each edition.
-            </p>
-          </div>
+      <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
+        <Card>
+          <CardHeader>
+            <CardTitle>About this title</CardTitle>
+            <CardDescription>
+              Catalog metadata used by inventory and distribution.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 text-sm">
+            {book.description ? (
+              <p className="whitespace-pre-wrap text-foreground">
+                {book.description}
+              </p>
+            ) : (
+              <p className="text-muted-foreground">No description yet.</p>
+            )}
+            <dl className="grid gap-2 sm:grid-cols-2">
+              <div>
+                <dt className="text-xs text-muted-foreground">Publisher</dt>
+                <dd>{book.publisher.name}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-muted-foreground">Editions</dt>
+                <dd>{book._count.editions}</dd>
+              </div>
+            </dl>
+          </CardContent>
+        </Card>
 
-          {editionPerformance.map(({ editionId, report, errorMessage }) => {
-            const edition = book.editions.find((item) => item.id === editionId);
-            if (!edition) {
-              return null;
-            }
-
-            const editionLabel = `${formatBookFormat(edition.format)} · ISBN ${formatIsbn13(edition.isbn)}`;
-            return (
-              <article
-                key={editionId}
-                aria-label={`${editionLabel} analytics`}
-                className="flex flex-col gap-4 rounded-lg border border-border p-4"
-              >
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h3 className="font-medium text-foreground">
-                      {edition.title || formatBookFormat(edition.format)}
-                    </h3>
-                    <p className="text-xs text-muted-foreground">
-                      {editionLabel}
-                    </p>
-                  </div>
-                  <Link
-                    href={editionPerformanceHref(editionId)}
-                    className={buttonClassName({
-                      variant: "outline",
-                      size: "sm",
-                    })}
-                  >
-                    Full report
-                  </Link>
-                </div>
-
-                {report ? (
-                  <>
-                    <EditionPerformanceKpis summary={report.summary} />
-                    {report.libraries.length > 0 ? (
-                      <EditionPerformanceTable libraries={report.libraries} />
-                    ) : (
-                      <EmptyState
-                        title="No library activity for this edition"
-                        description="This edition has not been distributed or sold through a partner library yet."
-                      />
-                    )}
-                  </>
-                ) : errorMessage ? (
-                  <ErrorState
-                    title="Edition analytics failed to load"
-                    message={errorMessage}
-                    action={<RetryReportButton />}
-                    className="py-8"
-                  />
-                ) : null}
-              </article>
-            );
-          })}
-        </section>
-      ) : null}
+        <Card className="overflow-hidden">
+          <CardHeader>
+            <CardTitle>Cover</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {book.coverImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={book.coverImageUrl}
+                alt={`Cover of ${book.title}`}
+                className="mx-auto max-h-64 rounded-md border border-border object-cover"
+              />
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                No cover URL. Add one when editing the book or an edition.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 }

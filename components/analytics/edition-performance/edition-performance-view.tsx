@@ -54,6 +54,14 @@ export function EditionPerformanceView({
       {report ? (
         <>
           <SelectedEditionSummary book={report.book} edition={report.edition} />
+          <p className="text-sm text-muted-foreground">
+            <Link
+              href={`/sales?editionId=${report.edition.id}`}
+              className="font-medium text-primary hover:underline"
+            >
+              View sales for this edition
+            </Link>
+          </p>
           <EditionPerformanceKpis summary={report.summary} />
           {report.libraries.length > 0 ? (
             <EditionPerformanceTable libraries={report.libraries} />
