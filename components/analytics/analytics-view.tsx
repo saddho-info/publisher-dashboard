@@ -30,6 +30,12 @@ export function AnalyticsView({ data }: { data: OverviewSnapshot }) {
               <PeriodSelect value={data.period.key} />
             </Suspense>
             <Link
+              href="/analytics/edition-performance"
+              className={buttonClassName({ variant: "outline", size: "sm" })}
+            >
+              Edition performance
+            </Link>
+            <Link
               href="/alerts"
               className={buttonClassName({ variant: "outline", size: "sm" })}
             >

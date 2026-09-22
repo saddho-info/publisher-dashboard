@@ -14,7 +14,7 @@ export function BooksSkeleton() {
         <Skeleton className="h-9 w-64" />
         <Skeleton className="h-9 w-36" />
       </div>
-      <SkeletonTable rows={6} cols={5} />
+      <SkeletonTable rows={6} cols={6} />
     </div>
   );
 }
@@ -27,7 +27,13 @@ export function BookDetailSkeleton() {
         <Skeleton className="h-4 w-48" />
       </div>
       <Skeleton variant="rectangular" className="h-40" />
-      <SkeletonTable rows={3} cols={4} />
+      <SkeletonTable rows={3} cols={6} />
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        <Skeleton variant="rectangular" className="h-28" />
+        <Skeleton variant="rectangular" className="h-28" />
+        <Skeleton variant="rectangular" className="h-28" />
+      </div>
+      <SkeletonTable rows={3} cols={6} />
     </div>
   );
 }

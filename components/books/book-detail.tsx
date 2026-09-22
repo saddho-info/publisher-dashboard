@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { EditionPerformanceKpis } from "@/components/analytics/edition-performance/edition-performance-kpis";
+import { EditionPerformanceTable } from "@/components/analytics/edition-performance/edition-performance-table";
+import { RetryReportButton } from "@/components/analytics/edition-performance/retry-report-button";
 import { Badge } from "@/components/ui/badge";
 import { buttonClassName } from "@/components/ui/button-styles";
 import {
@@ -9,6 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/empty-state";
+import { ErrorState } from "@/components/ui/error-state";
 import {
   Table,
   TableBody,
@@ -25,8 +29,22 @@ import {
   formatPublicationDate,
 } from "@/lib/books/format";
 import type { BookDetail } from "@/lib/books/types";
+import { editionPerformanceHref } from "@/lib/edition-performance/constants";
+import type { EditionPerformanceReport } from "@/lib/edition-performance/types";
 
-export function BookDetailView({ book }: { book: BookDetail }) {
+export type BookEditionPerformance = {
+  editionId: string;
+  report: EditionPerformanceReport | null;
+  errorMessage: string | null;
+};
+
+export function BookDetailView({
+  book,
+  editionPerformance = [],
+}: {
+  book: BookDetail;
+  editionPerformance?: BookEditionPerformance[];
+}) {
   return (
     <div className="flex flex-col gap-6">
       <PageHeader
@@ -196,6 +214,83 @@ export function BookDetailView({ book }: { book: BookDetail }) {
           </Table>
         )}
       </section>
+
+      {book.editions.length > 0 ? (
+        <section
+          className="flex flex-col gap-4"
+          aria-labelledby="edition-analytics-heading"
+        >
+          <div>
+            <h2
+              id="edition-analytics-heading"
+              className="text-base font-semibold"
+            >
+              Edition analytics
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              Library distribution, stock, sales, and revenue are kept
+              separate for each edition.
+            </p>
+          </div>
+
+          {editionPerformance.map(({ editionId, report, errorMessage }) => {
+            const edition = book.editions.find((item) => item.id === editionId);
+            if (!edition) {
+              return null;
+            }
+
+            const editionLabel = `${formatBookFormat(edition.format)} · ISBN ${formatIsbn13(edition.isbn)}`;
+            return (
+              <article
+                key={editionId}
+                aria-label={`${editionLabel} analytics`}
+                className="flex flex-col gap-4 rounded-lg border border-border p-4"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h3 className="font-medium text-foreground">
+                      {edition.title || formatBookFormat(edition.format)}
+                    </h3>
+                    <p className="text-xs text-muted-foreground">
+                      {editionLabel}
+                    </p>
+                  </div>
+                  <Link
+                    href={editionPerformanceHref(editionId)}
+                    className={buttonClassName({
+                      variant: "outline",
+                      size: "sm",
+                    })}
+                  >
+                    Full report
+                  </Link>
+                </div>
+
+                {report ? (
+                  <>
+                    <EditionPerformanceKpis summary={report.summary} />
+                    {report.libraries.length > 0 ? (
+                      <EditionPerformanceTable libraries={report.libraries} />
+                    ) : (
+                      <EmptyState
+                        title="No library activity for this edition"
+                        description="This edition has not been distributed or sold through a partner library yet."
+                      />
+                    )}
+                  </>
+                ) : errorMessage ? (
+                  <ErrorState
+                    title="Edition analytics failed to load"
+                    message={errorMessage}
+                    action={<RetryReportButton />}
+                    className="py-8"
+                  />
+                ) : null}
+              </article>
+            );
+          })}
+        </section>
+      ) : null}
     </div>
   );
 }

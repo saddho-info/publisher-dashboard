@@ -17,7 +17,7 @@ export function LibrariesSkeleton() {
         <Skeleton className="h-9 w-64" />
         <Skeleton className="h-9 w-36" />
       </div>
-      <SkeletonTable rows={6} cols={6} />
+      <SkeletonTable rows={6} cols={7} />
     </div>
   );
 }
@@ -29,7 +29,9 @@ export function LibraryDetailSkeleton() {
         <Skeleton className="h-6 w-64" />
         <Skeleton className="h-4 w-48" />
       </div>
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+        <Skeleton variant="rectangular" className="h-24" />
+        <Skeleton variant="rectangular" className="h-24" />
         <Skeleton variant="rectangular" className="h-24" />
         <Skeleton variant="rectangular" className="h-24" />
         <Skeleton variant="rectangular" className="h-24" />

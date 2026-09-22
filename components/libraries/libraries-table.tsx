@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { buttonClassName } from "@/components/ui/button-styles";
 import {
   Table,
   TableBody,
@@ -22,6 +23,7 @@ export function LibrariesTable({ libraries }: { libraries: LibraryListItem[] }) 
           <TableHead className="text-right">Staff</TableHead>
           <TableHead>Partnership</TableHead>
           <TableHead>Status</TableHead>
+          <TableHead>Analytics</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -54,6 +56,14 @@ export function LibrariesTable({ libraries }: { libraries: LibraryListItem[] }) 
               <Badge variant={library.isActive ? "success" : "muted"}>
                 {library.isActive ? "Active" : "Inactive"}
               </Badge>
+            </TableCell>
+            <TableCell>
+              <Link
+                href={`/libraries/${library.id}`}
+                className={buttonClassName({ variant: "outline", size: "sm" })}
+              >
+                View
+              </Link>
             </TableCell>
           </TableRow>
         ))}

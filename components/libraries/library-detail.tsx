@@ -8,14 +8,18 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { ErrorState } from "@/components/ui/error-state";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { LibraryPortalAccess } from "@/components/libraries/library-portal-access";
 import { PartnershipForm } from "./partnership-form";
+import { RetryPerformanceButton } from "./retry-performance-button";
 import { UnlinkLibraryButton } from "./unlink-library-button";
+import { formatMoney } from "@/lib/books/format";
 import { formatCount, formatLinkedDate } from "@/lib/libraries/format";
 import {
   canManageLibraries,
   type LibraryDetail,
+  type LibraryPublisherPerformance,
 } from "@/lib/libraries/types";
 import { canWriteDistributions } from "@/lib/distribution/types";
 import {
@@ -25,10 +29,14 @@ import {
 
 export function LibraryDetailView({
   library,
+  performance,
+  performanceError = null,
   role,
   portalUsers = [],
 }: {
   library: LibraryDetail;
+  performance: LibraryPublisherPerformance | null;
+  performanceError?: string | null;
   role: string;
   portalUsers?: LibraryUser[];
 }) {
@@ -85,30 +93,74 @@ export function LibraryDetailView({
         <span className="text-xs text-muted-foreground">/{library.slug}</span>
       </div>
 
-      <section aria-label="Stock at this library">
-        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <StockCard
-            label="On hand"
-            value={library.stock.onHand}
-            hint="Copies received and still held"
+      {performance ? (
+        <section aria-label="Publisher performance at this library">
+          <div className="mb-3">
+            <h2 className="text-base font-semibold">Publisher performance</h2>
+            <p className="text-sm text-muted-foreground">
+              Distribution, current stock, sales, and finalized revenue for
+              this publisher only.
+            </p>
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <StockCard
+              label="Total distributed"
+              value={performance.summary.totalDistributed}
+              hint="Copies sent or assigned"
+            />
+            <StockCard
+              label="In stock"
+              value={performance.summary.inStock}
+              hint="Copies currently available"
+            />
+            <StockCard
+              label="In transit"
+              value={performance.summary.inTransit}
+              hint="Dispatched, not yet received"
+            />
+            <StockCard
+              label="Sold"
+              value={performance.summary.sold}
+              hint="Confirmed unit sales"
+            />
+            <RevenueCard revenue={performance.summary.revenueByCurrency} />
+          </div>
+        </section>
+      ) : performanceError ? (
+        <section aria-label="Publisher performance at this library">
+          <ErrorState
+            title="Publisher performance failed to load"
+            message={performanceError}
+            action={<RetryPerformanceButton />}
+            className="py-8"
           />
-          <StockCard
-            label="In transit"
-            value={library.stock.inTransit}
-            hint="Distributed, not yet received"
-          />
-          <StockCard
-            label="Sold"
-            value={library.stock.sold}
-            hint="Confirmed unit sales"
-          />
-          <StockCard
-            label="Copies"
-            value={library.stock.copyCount}
-            hint="Physical units assigned here"
-          />
-        </div>
-      </section>
+        </section>
+      ) : (
+        <section aria-label="Stock at this library">
+          <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+            <StockCard
+              label="On hand"
+              value={library.stock.onHand}
+              hint="Copies received and still held"
+            />
+            <StockCard
+              label="In transit"
+              value={library.stock.inTransit}
+              hint="Distributed, not yet received"
+            />
+            <StockCard
+              label="Sold"
+              value={library.stock.sold}
+              hint="Confirmed unit sales"
+            />
+            <StockCard
+              label="Copies"
+              value={library.stock.copyCount}
+              hint="Physical units assigned here"
+            />
+          </div>
+        </section>
+      )}
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(16rem,1fr)]">
         <Card>
@@ -186,6 +238,41 @@ function StockCard({
       </CardHeader>
       <CardContent className="pt-0">
         <p className="text-xs text-muted-foreground">{hint}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function RevenueCard({
+  revenue,
+}: {
+  revenue: LibraryPublisherPerformance["summary"]["revenueByCurrency"];
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardDescription>Revenue</CardDescription>
+        <CardTitle className="text-2xl tabular-nums">
+          {revenue[0]
+            ? formatMoney(revenue[0].totalCents, revenue[0].currency)
+            : "—"}
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="pt-0">
+        {revenue.length > 1 ? (
+          <ul className="mb-1 space-y-0.5 text-sm font-medium tabular-nums">
+            {revenue.slice(1).map((entry) => (
+              <li key={entry.currency}>
+                {formatMoney(entry.totalCents, entry.currency)}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        <p className="text-xs text-muted-foreground">
+          {revenue.length > 1
+            ? "Reported separately per currency"
+            : "Finalized sales total"}
+        </p>
       </CardContent>
     </Card>
   );
