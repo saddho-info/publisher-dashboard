@@ -3,10 +3,17 @@ import { notFound } from "next/navigation";
 import { LibraryDetailView } from "@/components/libraries/library-detail";
 import { ApiError } from "@/lib/api/server";
 import { requirePublisherSession } from "@/lib/auth/session";
+import { getDistributions } from "@/lib/distribution/get-distributions";
+import type { DistributionListItem } from "@/lib/distribution/types";
 import {
   getLibrary,
+  getLibraryEditionPerformance,
   getLibraryPublisherPerformance,
 } from "@/lib/libraries/get-libraries";
+import type {
+  LibraryEditionPerformance,
+  LibraryPublisherPerformance,
+} from "@/lib/libraries/types";
 import { getLibraryUsers } from "@/lib/users/get-users";
 import { canManageLibraryPortalAccess } from "@/lib/users/types";
 
@@ -24,6 +31,21 @@ export async function generateMetadata({
   }
 }
 
+function settledValue<T>(result: PromiseSettledResult<T>): T | null {
+  return result.status === "fulfilled" ? result.value : null;
+}
+
+function settledApiError(result: PromiseSettledResult<unknown>): string | null {
+  if (result.status === "fulfilled") {
+    return null;
+  }
+  const error: unknown = result.reason;
+  if (error instanceof ApiError) {
+    return error.message;
+  }
+  throw error;
+}
+
 export default async function LibraryDetailPage({
   params,
 }: {
@@ -31,9 +53,22 @@ export default async function LibraryDetailPage({
 }) {
   const user = await requirePublisherSession();
   const { libraryId } = await params;
-  const [libraryResult, performanceResult] = await Promise.allSettled([
+  const loadPublisherLedger = Boolean(user.publisherId);
+
+  const [
+    libraryResult,
+    performanceResult,
+    editionPerformanceResult,
+    shipmentsResult,
+  ] = await Promise.allSettled([
     getLibrary(libraryId),
-    user.publisherId ? getLibraryPublisherPerformance(libraryId) : null,
+    loadPublisherLedger
+      ? getLibraryPublisherPerformance(libraryId)
+      : Promise.resolve(null),
+    loadPublisherLedger
+      ? getLibraryEditionPerformance(libraryId)
+      : Promise.resolve(null),
+    getDistributions({ libraryId, page: 1, limit: 10 }),
   ]);
 
   if (libraryResult.status === "rejected") {
@@ -44,18 +79,18 @@ export default async function LibraryDetailPage({
     throw error;
   }
 
-  let performance = null;
-  let performanceError: string | null = null;
-  if (performanceResult.status === "fulfilled") {
-    performance = performanceResult.value;
-  } else {
-    const error: unknown = performanceResult.reason;
-    if (error instanceof ApiError) {
-      performanceError = error.message;
-    } else {
-      throw error;
-    }
-  }
+  const performance = settledValue(
+    performanceResult,
+  ) as LibraryPublisherPerformance | null;
+  const performanceError = settledApiError(performanceResult);
+  const editionPerformance = settledValue(
+    editionPerformanceResult,
+  ) as LibraryEditionPerformance | null;
+  const editionPerformanceError = settledApiError(editionPerformanceResult);
+  const shipmentsPage = settledValue(shipmentsResult);
+  const shipmentsError = settledApiError(shipmentsResult);
+  const shipments: DistributionListItem[] = shipmentsPage?.data ?? [];
+  const shipmentsTotal = shipmentsPage?.meta.total ?? 0;
 
   const portalUsers = canManageLibraryPortalAccess(user.role)
     ? (
@@ -71,6 +106,11 @@ export default async function LibraryDetailPage({
       library={libraryResult.value}
       performance={performance}
       performanceError={performanceError}
+      editionPerformance={editionPerformance}
+      editionPerformanceError={editionPerformanceError}
+      shipments={shipments}
+      shipmentsError={shipmentsError}
+      shipmentsTotal={shipmentsTotal}
       role={user.role}
       portalUsers={portalUsers}
     />

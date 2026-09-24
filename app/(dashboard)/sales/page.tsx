@@ -18,6 +18,7 @@ export default async function SalesPage({
   searchParams: Promise<{
     search?: string;
     libraryId?: string;
+    editionId?: string;
     page?: string;
   }>;
 }) {
@@ -25,18 +26,21 @@ export default async function SalesPage({
   const params = await searchParams;
   const search = params.search?.trim() ?? "";
   const libraryId = params.libraryId?.trim() ?? "";
+  const editionId = params.editionId?.trim() ?? "";
   const page = Math.max(1, Number(params.page) || 1);
 
   const [summary, result, libraries] = await Promise.all([
     getSaleSummary({
       search: search || undefined,
       libraryId: libraryId || undefined,
+      editionId: editionId || undefined,
     }),
     getSales({
       page,
       limit: 20,
       search: search || undefined,
       libraryId: libraryId || undefined,
+      editionId: editionId || undefined,
     }),
     getLibraries({ page: 1, limit: 100, isActive: true }),
   ]);
@@ -53,16 +57,17 @@ export default async function SalesPage({
       <SalesFilters
         search={search}
         libraryId={libraryId}
+        editionId={editionId}
         libraries={libraries.data}
       />
 
       {result.data.length === 0 ? (
         <EmptyState
           title={
-            search || libraryId ? "No matching sales" : "No sales yet"
+            search || libraryId || editionId ? "No matching sales" : "No sales yet"
           }
           description={
-            search || libraryId
+            search || libraryId || editionId
               ? "Try a different search or library filter."
               : "Sales appear here after a partner library sells copies of your editions."
           }
@@ -72,7 +77,7 @@ export default async function SalesPage({
           <SalesTable sales={result.data} />
           <SalesPagination
             meta={result.meta}
-            query={{ search, libraryId }}
+            query={{ search, libraryId, editionId }}
           />
         </>
       )}

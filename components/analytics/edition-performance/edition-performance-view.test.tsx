@@ -174,6 +174,10 @@ describe("EditionPerformanceView", () => {
     expect(riverside.getByText("$60.00")).toBeVisible();
 
     expect(
+      screen.getByRole("link", { name: "View sales for this edition" }),
+    ).toHaveAttribute("href", "/sales?editionId=ed_hardcover");
+
+    expect(
       within(rows[1]).getByRole("link", { name: "Harbor Reading Room" }),
     ).toHaveAttribute("href", "/libraries/lib_harbor");
     expect(within(rows[1]).getByText("€45.00")).toBeVisible();
